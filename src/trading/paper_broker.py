@@ -5,11 +5,22 @@ from datetime import datetime
 
 def get_connection():
     import os
-    db_dir = os.path.dirname(config.DB_PATH)
-    if db_dir and not os.path.exists(db_dir):
-        os.makedirs(db_dir, exist_ok=True)
-    conn = sqlite3.connect(config.DB_PATH)
-    return conn
+    db_path = os.path.abspath(config.DB_PATH)
+    db_dir = os.path.dirname(db_path)
+    try:
+        if db_dir and not os.path.exists(db_dir):
+            os.makedirs(db_dir, exist_ok=True)
+        conn = sqlite3.connect(db_path)
+        return conn
+    except sqlite3.OperationalError:
+        # Fallback to writeable temp folder on Linux/macOS or Windows
+        print(f"[DB] OperationalError opening {db_path}. Falling back to system temp folder.")
+        tmp_db_path = "/tmp/paper_trades.db"
+        if os.name == 'nt':
+            import tempfile
+            tmp_db_path = os.path.join(tempfile.gettempdir(), "paper_trades.db")
+        conn = sqlite3.connect(tmp_db_path)
+        return conn
 
 
 
@@ -96,6 +107,18 @@ def resolve_trade_in_db(trade_id, actual_temp, pnl):
 
 def get_all_trades():
     conn = get_connection()
+    # Self-heal: check if the 'trades' table exists. If not, run init_db()
+    try:
+        cursor = conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='trades'")
+        table_exists = cursor.fetchone()
+    except sqlite3.OperationalError:
+        table_exists = False
+        
+    if not table_exists:
+        conn.close()
+        init_db()
+        conn = get_connection()
+        
     cursor = conn.execute("SELECT * FROM trades ORDER BY timestamp DESC")
     columns = [description[0] for description in cursor.description]
     rows = [dict(zip(columns, row)) for row in cursor.fetchall()]

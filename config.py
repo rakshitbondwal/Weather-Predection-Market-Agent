@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 env_path = os.path.join(os.path.dirname(__file__), ".env")
 load_dotenv(dotenv_path=env_path, override=True)
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "data", "paper_trades.db")
+DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "data", "paper_trades.db"))
 CITIES = [
     {"name": "Hong Kong", "country": "HK", "lat": 22.3193, "lon": 114.1694, "market_keyword": "Hong Kong"},
     {"name": "Shanghai", "country": "CN", "lat": 31.2304, "lon": 121.4737, "market_keyword": "Shanghai"},
