@@ -2,7 +2,13 @@
 
 An automated quantitative trading agent that predictions and trades on Polymarket weather contracts using consensus weather forecasts, LLM-based risk assessments, and fractional-Kelly capital allocation.
 
+## Live Dashboard
+
+The application is deployed and running live at:
+[https://weather-predection-market-agent-9bhhjbwxymec2pw4rjw4ht.streamlit.app/](https://weather-predection-market-agent-9bhhjbwxymec2pw4rjw4ht.streamlit.app/)
+
 ---
+
 
 ## Features
 
