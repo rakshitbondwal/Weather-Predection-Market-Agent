@@ -5,6 +5,7 @@ from datetime import datetime
 
 def get_connection():
     import os
+    import shutil
     db_path = os.path.abspath(config.DB_PATH)
     db_dir = os.path.dirname(db_path)
     try:
@@ -19,8 +20,18 @@ def get_connection():
         if os.name == 'nt':
             import tempfile
             tmp_db_path = os.path.join(tempfile.gettempdir(), "paper_trades.db")
+        
+        # If the temp database does not exist, copy the pre-populated repository database
+        if not os.path.exists(tmp_db_path) and os.path.exists(db_path):
+            try:
+                shutil.copy(db_path, tmp_db_path)
+                print(f"[DB] Copied pre-populated database to {tmp_db_path}")
+            except Exception as copy_err:
+                print(f"[DB] Failed to copy pre-populated database: {copy_err}")
+                
         conn = sqlite3.connect(tmp_db_path)
         return conn
+
 
 
 
